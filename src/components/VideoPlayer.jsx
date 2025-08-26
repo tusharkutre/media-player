@@ -6,49 +6,40 @@ import media from "../assets/media.png";
 const VideoPlayer = () => {
   const navigate = useNavigate();
 
+  const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+
   const videoRef = useRef(null);
   const [currentVideo, setCurrentVideo] = useState(videos[0]); // Default to the first video
 
-  // Helper function to set a cookie
-  const setCookie = (name, value, days) => {
-    const expires = new Date(
-      Date.now() + days * 24 * 60 * 60 * 1000
-    ).toUTCString();
-    document.cookie = `${name}=${value}; expires=${expires}; path=/`;
-  };
+  // helper to build per-user playback storage key
+  const playbackKey = (email, videoId) => `playback_${email}_${videoId}`;
 
-  // Helper function to get a cookie
-  const getCookie = (name) => {
-    const cookies = document.cookie.split("; ");
-    const cookie = cookies.find((c) => c.startsWith(`${name}=`));
-    return cookie ? cookie.split("=")[1] : null;
+  // restore playback time when video metadata is loaded
+  const handleLoadedMetadata = () => {
+    if (!videoRef.current || !currentUser) return;
+    const key = playbackKey(currentUser.email, currentVideo.id);
+    const t = localStorage.getItem(key);
+    if (t) {
+      videoRef.current.currentTime = parseFloat(t);
+    }
   };
 
   useEffect(() => {
-    // Load the saved playback time for the current video
-    const savedTime = getCookie(`video_${currentVideo.id}_time`);
-    if (savedTime && videoRef.current) {
-      videoRef.current.currentTime = parseFloat(savedTime);
-    }
-  }, [currentVideo]);
+    // when component mounts, nothing to restore except playback time per video (handled on metadata load)
+  }, []);
 
-  // Handle video time updates
+  // Handle video time updates: save playback time per user+video in localStorage
   const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      // Save the current playback time in a cookie
-      setCookie(
-        `video_${currentVideo.id}_time`,
-        videoRef.current.currentTime,
-        7
-      ); // Expires in 7 days
-    }
+    if (!videoRef.current || !currentUser) return;
+    const key = playbackKey(currentUser.email, currentVideo.id);
+    localStorage.setItem(key, String(videoRef.current.currentTime));
   };
 
   // Handle video selection from the list
   const handleVideoSelect = (video) => {
     setCurrentVideo(video);
     if (videoRef.current) {
-      videoRef.current.load(); // Reload the video player with the new source
+      videoRef.current.load(); // reload video source; time will be restored on metadata load
     }
   };
 
@@ -81,6 +72,7 @@ const VideoPlayer = () => {
           controls
           autoPlay
           onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
           className="w-2xl rounded-2xl"
         >
           <source src={currentVideo.file} type="video/mp4" />
@@ -90,7 +82,7 @@ const VideoPlayer = () => {
           <p className="text-sm text-gray-600">{currentVideo.description}</p>
         </div>
       </div>
-      <div className="video-list grid lg:grid-cols-5 md:grid-cols-2 gap-3">
+      <div className="video-list grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 gap-3">
         {/* videos map code here */}
         {videos.map((video) => (
           <div
