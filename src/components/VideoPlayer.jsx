@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-// import videos from "../utils/data.js";
+import videos from "../utils/data.js";
 import { useNavigate } from "react-router-dom";
 import media from "../assets/media.png";
 
