@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import media from "../assets/media.png";
 
 const VideoPlayer = () => {
-
   const navigate = useNavigate();
 
   const videoRef = useRef(null);
@@ -12,7 +11,9 @@ const VideoPlayer = () => {
 
   // Helper function to set a cookie
   const setCookie = (name, value, days) => {
-    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+    const expires = new Date(
+      Date.now() + days * 24 * 60 * 60 * 1000
+    ).toUTCString();
     document.cookie = `${name}=${value}; expires=${expires}; path=/`;
   };
 
@@ -35,7 +36,11 @@ const VideoPlayer = () => {
   const handleTimeUpdate = () => {
     if (videoRef.current) {
       // Save the current playback time in a cookie
-      setCookie(`video_${currentVideo.id}_time`, videoRef.current.currentTime, 7); // Expires in 7 days
+      setCookie(
+        `video_${currentVideo.id}_time`,
+        videoRef.current.currentTime,
+        7
+      ); // Expires in 7 days
     }
   };
 
@@ -54,19 +59,22 @@ const VideoPlayer = () => {
 
   return (
     <section className="h-screen p-4">
-
       <div className="flex justify-between items-center">
-
         <div className="flex justify-center items-center mb-4">
           <h2 className="text-2xl font-bold ">Media Player</h2>
           <img src={media} width={50} alt="Media" />
         </div>
 
-      <button onClick={handleLogout} className="bg-slate-400/70 cursor-pointer text-white px-4 py-2 rounded-2xl">
-        Logout
-      </button>
+        <button
+          onClick={handleLogout}
+          className="bg-slate-400/70 cursor-pointer text-white px-4 py-2 rounded-2xl"
+        >
+          Logout
+        </button>
       </div>
-      <h2 className="text-xl mb-6 font-semibold">Now playing {currentVideo.title}</h2>
+      <h2 className="text-xl mb-6 font-semibold">
+        Now playing {currentVideo.title}
+      </h2>
       <div className="video-container flex flex-col justify-center mb-4">
         <video
           ref={videoRef}
@@ -84,21 +92,24 @@ const VideoPlayer = () => {
       </div>
       <div className="video-list grid lg:grid-cols-5 md:grid-cols-2 gap-3">
         {/* videos map code here */}
+        {videos.map((video) => (
+          <div
+            key={video.id}
+            className="videoDiv p-3 rounded-2xl cursor-pointer lg:w-fit bg-slate-200 hover:bg-gray-200"
+            onClick={() => handleVideoSelect(video)}
+          >
+            <img
+              src={video.thumbnail}
+              alt={video.title}
+              className="w-full h-auto rounded-md"
+            />
+            <h3 className="text-lg font-semibold">{video.title}</h3>
+            <p className="text-sm text-gray-600">{video.description}</p>
+          </div>
+        ))}
       </div>
     </section>
   );
 };
 
 export default VideoPlayer;
-
-        // {videos.map((video) => (
-        //   <div
-        //     key={video.id}
-        //     className="videoDiv p-3 rounded-2xl cursor-pointer lg:w-fit bg-slate-200 hover:bg-gray-200"
-        //     onClick={() => handleVideoSelect(video)}
-        //   >
-        //     <img src={video.thumbnail} alt={video.title} className="w-full h-auto rounded-md" />
-        //     <h3 className="text-lg font-semibold">{video.title}</h3>
-        //     <p className="text-sm text-gray-600">{video.description}</p>
-        //   </div>
-        // ))}
