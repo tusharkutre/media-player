@@ -24,10 +24,6 @@ const VideoPlayer = () => {
     }
   };
 
-  useEffect(() => {
-    // when component mounts, nothing to restore except playback time per video (handled on metadata load)
-  }, []);
-
   // Handle video time updates: save playback time per user+video in localStorage
   const handleTimeUpdate = () => {
     if (!videoRef.current || !currentUser) return;
@@ -48,6 +44,41 @@ const VideoPlayer = () => {
     navigate("/login");
   };
 
+  // Keyboard shortcuts: ArrowLeft (-5s) ArrowRight (+5s)
+  useEffect(() => {
+    const onKey = (e) => {
+      if (!videoRef.current) return;
+      // don't interfere when typing in inputs or editable elements
+      const tag = e.target && e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
+
+      // Space toggles play/pause
+      if (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        if (videoRef.current.paused) {
+          videoRef.current.play();
+        } else {
+          videoRef.current.pause();
+        }
+        handleTimeUpdate();
+        return; 
+      }
+
+      if (e.key === "ArrowLeft") {
+        videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 5);
+        handleTimeUpdate();
+      } else if (e.key === "ArrowRight") {
+        videoRef.current.currentTime = Math.min(
+          videoRef.current.duration || Infinity,
+          videoRef.current.currentTime + 5
+        );
+        handleTimeUpdate();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
     <section className="h-screen p-4">
       <div className="flex justify-between items-center">
@@ -64,7 +95,7 @@ const VideoPlayer = () => {
         </button>
       </div>
       <h2 className="text-xl mb-6 font-semibold">
-        Now playing {currentVideo.title}
+        Now playing {currentVideo.description}
       </h2>
       <div className="video-container flex flex-col justify-center mb-4">
         <video
@@ -78,8 +109,8 @@ const VideoPlayer = () => {
           <source src={currentVideo.file} type="video/mp4" />
         </video>
         <div className="mt-4">
-          <h3 className="text-xl font-semibold">{currentVideo.title}</h3>
-          <p className="text-sm text-gray-600">{currentVideo.description}</p>
+          <h3 className="text-xl font-semibold">{currentVideo.description}</h3>
+          <p className="text-sm text-gray-600 mb-5">{currentVideo.channel}</p>
         </div>
       </div>
       <div className="video-list grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 gap-3">
@@ -95,8 +126,8 @@ const VideoPlayer = () => {
               alt={video.title}
               className="w-full h-auto rounded-md"
             />
-            <h3 className="text-lg font-semibold">{video.title}</h3>
-            <p className="text-sm text-gray-600">{video.description}</p>
+            <h3 className="text-md font-semibold">{video.description}</h3>
+            <p className="text-sm text-gray-600">{video.channel}</p>
           </div>
         ))}
       </div>

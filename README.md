@@ -6,6 +6,7 @@
 - vite
 
 # Features :
+- added thumbnail to each video
 - added login page
 - added video tag to support video functionality
 - added controls
