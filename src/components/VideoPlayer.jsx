@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import videos from "../utils/data.js";
 import { useNavigate } from "react-router-dom";
 import media from "../assets/media.png";
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const VideoPlayer = () => {
   const navigate = useNavigate();
@@ -95,7 +97,7 @@ const VideoPlayer = () => {
         </button>
       </div>
       <h2 className="text-xl mb-6 font-semibold">
-        Now playing {currentVideo.description}
+        Now playing {currentVideo.description || <Skeleton count={1}/>}
       </h2>
       <div className="video-container flex flex-col justify-center mb-4">
         <video
@@ -121,13 +123,18 @@ const VideoPlayer = () => {
             className="videoDiv p-3 rounded-2xl cursor-pointer lg:w-fit bg-slate-200 hover:bg-gray-200"
             onClick={() => handleVideoSelect(video)}
           >
-            <img
-              src={video.thumbnail}
-              alt={video.title}
-              className="w-full h-auto rounded-md"
-            />
-            <h3 className="text-md font-semibold">{video.description}</h3>
-            <p className="text-sm text-gray-600">{video.channel}</p>
+            {video.thumbnail ? (
+              <img
+                src={video.thumbnail}
+                alt={video.title}
+                className="w-full h-auto rounded-md"
+              />
+            ) : (
+              <Skeleton height={120} className="w-full rounded-md" />
+            )}
+
+            <h3 className="text-md font-semibold">{video.description ?? <Skeleton />}</h3>
+            <p className="text-sm text-gray-600">{video.channel ?? <Skeleton width={100} />}</p>
           </div>
         ))}
       </div>

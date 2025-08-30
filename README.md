@@ -6,6 +6,7 @@
 - vite
 
 # Features :
+- added events like space , left and right keys to control a video.
 - added thumbnail to each video
 - added login page
 - added video tag to support video functionality
